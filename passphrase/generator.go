@@ -3,25 +3,28 @@ package passphrase
 import (
 	"bufio"
 	"crypto/rand"
-	// "fmt"
 	"math/big"
-	// "os"
+	"os"
+    "io/fs"
 	"strings"
-    "embed"
 )
 
 // TODO: Better error handling
-
-
-//go:embed wordlists/*
-var f embed.FS
 
 type WordList struct {
     digits int 
     table map[string]string
 }
 
+
 func NewWordList(path string, digits int) *WordList {
+    cwd, _ := os.Getwd()
+    f := os.DirFS(cwd)
+    return NewWordListCustomFS(f, path, digits)
+
+}
+
+func NewWordListCustomFS(f fs.FS, path string, digits int) *WordList {
     table := make(map[string]string)
 
     readFile, err := f.Open(path)
