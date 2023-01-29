@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-// TODO: Better error handling
-
 type WordList struct {
 	digits int
 	table  map[string]string
@@ -21,7 +19,6 @@ func NewWordList(path string, digits int) *WordList {
 	cwd, _ := os.Getwd()
 	f := os.DirFS(cwd)
 	return NewWordListCustomFS(f, path, digits)
-
 }
 
 func NewWordListCustomFS(f fs.FS, path string, digits int) *WordList {
@@ -32,8 +29,6 @@ func NewWordListCustomFS(f fs.FS, path string, digits int) *WordList {
 		panic(err)
 	}
 
-	// TODO: Implement error handling. This should not be deferred without
-	// error handling, must be checked explicitly.
 	defer func() {
 		err := readFile.Close()
 
