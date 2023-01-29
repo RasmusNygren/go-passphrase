@@ -3,6 +3,7 @@ package passphrase
 import (
 	"bufio"
 	"crypto/rand"
+	"fmt"
 	"io/fs"
 	"math/big"
 	"os"
@@ -33,7 +34,14 @@ func NewWordListCustomFS(f fs.FS, path string, digits int) *WordList {
 
 	// TODO: Implement error handling. This should not be deferred without
 	// error handling, must be checked explicitly.
-	defer readFile.Close()
+	defer func() {
+		err := readFile.Close()
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing file: %v\n", err)
+			os.Exit(1)
+		}
+	}()
 
 	fileScanner := bufio.NewScanner(readFile)
 
@@ -63,14 +71,11 @@ func generateWord(wl *WordList) string {
 			panic(err)
 		}
 
-		// This is safe as the generated numbers are always in [1,6]
 		randint = randint.Add(randint, big.NewInt(1))
 		stringBuilder.WriteString(randint.String())
 	}
 
 	randomNumberAsStr := stringBuilder.String()
-	// fmt.Println(randomNumberAsStr)
-	// fmt.Println(wordList[randomNumberAsStr])
 	word := wordList[randomNumberAsStr]
 	return word
 }
