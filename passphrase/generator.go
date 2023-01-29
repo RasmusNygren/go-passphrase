@@ -3,14 +3,18 @@ package passphrase
 import (
 	"bufio"
 	"crypto/rand"
-	"fmt"
+	// "fmt"
 	"math/big"
-	"os"
+	// "os"
 	"strings"
+    "embed"
 )
 
 // TODO: Better error handling
 
+
+//go:embed wordlists/*
+var f embed.FS
 
 type WordList struct {
     digits int 
@@ -19,7 +23,8 @@ type WordList struct {
 
 func NewWordList(path string, digits int) *WordList {
     table := make(map[string]string)
-    readFile, err := os.Open(path)
+
+    readFile, err := f.Open(path)
     if err != nil {
         panic(err)
     }
@@ -82,13 +87,4 @@ func GeneratePhraseWithCustomDelimiter(wl *WordList, length int, delimiter strin
 
 func GeneratePhrase(wl *WordList, length int) string {
     return GeneratePhraseWithCustomDelimiter(wl, length, "-")
-}
-
-func main() {
-    // Ensure this is actually a random and cryptographically safe way to generate the number
-
-    // wl := EffLarge()
-    wl := EffSmallShortWords()
-    phrase := GeneratePhrase(wl, 3)
-    fmt.Println(phrase)
 }
