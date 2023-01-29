@@ -1,4 +1,5 @@
-package main
+package passphrase
+
 
 func EffLarge() *WordList {
     wl := NewWordList("./wordlists/eff_large_wordlist.txt", 5)
