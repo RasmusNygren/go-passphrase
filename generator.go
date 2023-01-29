@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-
-// This only allows for a 6-sided dice, it might make sense to generalize 
-// to an n-sided die.
-
 // TODO: Better error handling
 
 
