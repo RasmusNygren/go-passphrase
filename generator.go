@@ -7,40 +7,92 @@ import (
 	"math/big"
 	"os"
 	"strings"
-	// "strconv"
 )
 
 
+// This only allows for a 6-sided dice, it might make sense to generalize 
+// to an n-sided die.
 
-func main() {
+// TODO: Better error handling
 
-    wordList := make(map[string]string)
-    readFile, err := os.Open("./wordlists/eff_large_wordlist.txt")
+
+type WordList struct {
+    digits int 
+    table map[string]string
+}
+
+func NewWordList(path string, digits int) *WordList {
+    table := make(map[string]string)
+    readFile, err := os.Open(path)
     if err != nil {
         panic(err)
     }
+
+    // TODO: Implement error handling. This should not be deferred without
+    // error handling, must be checked explicitly.
     defer readFile.Close()
 
-
     fileScanner := bufio.NewScanner(readFile)
-    // fileScanner.Split(bufio.ScanLines)
 
     for fileScanner.Scan() {
         line := fileScanner.Text()
         splits := strings.Fields(line)
         key, val := splits[0], splits[1]
-        wordList[key] = val
+        table[key] = val
     }
 
-    // Ensure this is actually a random and cryptographically safe way to generate the number
-    for i := 0; i < 5; i++ {
+    wordList := WordList{
+        digits: digits,
+        table: table,
+    }
+    return &wordList
+}
+
+func generateWord(wl *WordList) string {
+    wordList := wl.table
+    digits := wl.digits
+
+    var stringBuilder strings.Builder
+    for i := 0; i < digits; i++ {
+        // This assumes a 6-sided die.
         randint, err := rand.Int(rand.Reader, big.NewInt(6))
         if err != nil {
             panic(err)
         }
+
         // This is safe as the generated numbers are always in [1,6]
-        fmt.Println(int(randint.Int64()) + 1)
+        randint = randint.Add(randint, big.NewInt(1))
+        stringBuilder.WriteString(randint.String())
     }
 
-	// fmt.Println(wordList)
+    randomNumberAsStr := stringBuilder.String()
+    // fmt.Println(randomNumberAsStr)
+    // fmt.Println(wordList[randomNumberAsStr])
+    word := wordList[randomNumberAsStr]
+    return word
+}
+
+func GeneratePhraseWithCustomDelimiter(wl *WordList, length int, delimiter string) string {
+    var sb strings.Builder
+    for i := 0; i < length; i++ {
+        word := generateWord(wl)
+        sb.WriteString(word)
+        if i < length - 1 {
+            sb.WriteString(delimiter)
+        }
+    }
+    return sb.String()
+}
+
+func GeneratePhrase(wl *WordList, length int) string {
+    return GeneratePhraseWithCustomDelimiter(wl, length, "-")
+}
+
+func main() {
+    // Ensure this is actually a random and cryptographically safe way to generate the number
+
+    // wl := EffLarge()
+    wl := EffSmallShortWords()
+    phrase := GeneratePhrase(wl, 3)
+    fmt.Println(phrase)
 }
